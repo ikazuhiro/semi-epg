@@ -2120,6 +2120,16 @@ Parameter must be '(PROMPT CHOICE1 (CHOICE2...))."
       (while (re-search-forward "[ \t]+$" nil t)
 	(delete-region (match-beginning 0) (match-end 0))))))
 
+(defun mime-edit-pgp-key-usable-p (key usage)
+  "Return non-nil if KEY is usable for USAGE.
+KEY is a epg key object.
+USAGE is a symbol denoting the intended usage."
+  (catch 'usable
+    (dolist (subkey (epg-key-sub-key-list key))
+      (when (and (memq usage (epg-sub-key-capability subkey))
+		 (not (memq (epg-sub-key-validity subkey) '(revoked expired))))
+	(throw 'usable key)))))
+
 (defun mime-edit-pgp-get-signers (context)
   (let ((signers
 	 (delete nil (cons
@@ -2138,8 +2148,8 @@ Select keys for signing.
 If no one is selected, default secret key is used.  "
 	 signers
 	 t)
-      (mapcar (lambda (name) (car (epg-list-keys context name t)))
-	      signers))))
+      (delq nil (mapcar (lambda (key)
+			  (mime-edit-pgp-key-usable-p key 'sign)) (epg-list-keys context signers))))))
 
 (defun mime-edit-sign-pgp-mime (beg end boundary)
   (save-excursion
@@ -2304,9 +2314,8 @@ Select recipients for encryption.
 If no one is selected, symmetric encryption will be performed.  "
 				     recipients))
 	    (setq recipients
-		  (delq nil (mapcar (lambda (name)
-				      (car (epg-list-keys context name)))
-				    recipients))))
+		  (delq nil (mapcar (lambda (key)
+				      (mime-edit-pgp-key-usable-p key 'encrypt)) (epg-list-keys context recipients)))))
 	  (condition-case error
 	      (setq cipher
 		    (epg-encrypt-string
