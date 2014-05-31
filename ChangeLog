@@ -1,5 +1,21 @@
 2014-05-31  Juliusz Chroboczek  <jch@pps.univ-paris-diderot.fr>
 
+	* mime-edit.el (mime-edit-insert-tag): use save-excursion.
+	(mime-edit-split-and-send): ditto.
+	(mime-edit-split-and-send): ditto.
+	(mime-edit-insert-tag): use match-string instead of buffer-substring.
+	(mime-edit-define-charset): ditto.
+	(mime-edit-define-encoding): ditto.
+	(mime-edit-find-inmost): ditto.
+	(mime-edit-enquote-region): ditto.
+	(mime-edit-dequote-region): ditto.
+	(mime-edit-text-coding): ditto.
+	(mime-edit-translate-single-part-tag): ditto.
+	(mime-edit-translate-region): ditto.
+	(mime-edit-normalize-body): ditto.
+
+2014-05-31  Juliusz Chroboczek  <jch@pps.univ-paris-diderot.fr>
+
 	* mime-edit.el (mime-edit-preview-message): Don't go through
 	temporary string, insert directly from original buffer.
 

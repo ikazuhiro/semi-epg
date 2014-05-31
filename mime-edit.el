@@ -1672,7 +1672,7 @@ If nothing is inserted, return nil."
     (setq oldtag
 	  (save-excursion
 	    (if (mime-edit-goto-tag)
-		(buffer-substring (match-beginning 0) (match-end 0))
+		(match-string 0)
 	      ;; Assume content type is 'text/plan'.
 	      (mime-make-tag "text" "plain")
 	      )))
@@ -1822,7 +1822,7 @@ Optional argument ENCODING is ignored."
   "Set charset of current tag to CHARSET."
   (save-excursion
     (if (mime-edit-goto-tag)
-	(let ((tag (buffer-substring (match-beginning 0) (match-end 0))))
+	(let ((tag (match-string 0)))
 	  (delete-region (match-beginning 0) (match-end 0))
 	  (insert
 	   (mime-create-tag
@@ -1840,7 +1840,7 @@ Optional argument ENCODING is ignored."
   "Set encoding of current tag to ENCODING."
   (save-excursion
     (if (mime-edit-goto-tag)
-	(let ((tag (buffer-substring (match-beginning 0) (match-end 0))))
+	(let ((tag (match-string 0)))
 	  (delete-region (match-beginning 0) (match-end 0))
 	  (insert (mime-create-tag (mime-edit-get-contype tag) encoding)))
       )))
@@ -2103,7 +2103,7 @@ Parameter must be '(PROMPT CHOICE1 (CHOICE2...))."
   (if (re-search-forward mime-edit-multipart-beginning-regexp nil t)
       (let ((bb (match-beginning 0))
 	    (be (match-end 0))
-	    (type (buffer-substring (match-beginning 1)(match-end 1)))
+	    (type (match-string 1))
 	    end-exp eb)
 	(setq end-exp (format "--}-<<%s>>\n" type))
 	(widen)
@@ -2178,7 +2178,7 @@ Parameter must be '(PROMPT CHOICE1 (CHOICE2...))."
       (narrow-to-region beg end)
       (goto-char beg)
       (while (re-search-forward mime-edit-single-part-tag-regexp nil t)
-	(let ((tag (buffer-substring (match-beginning 0)(match-end 0))))
+	(let ((tag (match-string 0)))
 	  (replace-match (concat "- " (substring tag 1)))
 	  )))))
 
@@ -2189,7 +2189,7 @@ Parameter must be '(PROMPT CHOICE1 (CHOICE2...))."
       (goto-char beg)
       (while (re-search-forward
 	      mime-edit-quoted-single-part-tag-regexp nil t)
-	(let ((tag (buffer-substring (match-beginning 0)(match-end 0))))
+	(let ((tag (match-string 0)))
 	  (replace-match (concat "-" (substring tag 2)))
 	  )))))
 
@@ -2316,7 +2316,7 @@ Content-Description: OpenPGP Digital Signature
 	    (or (and (re-search-backward
 		      mime-edit-single-part-tag-regexp nil t)
 		     (goto-char (match-end 0))
-		     (buffer-substring (match-beginning 0) (match-end 0)))
+		     (match-string 0))
 		(progn (goto-char (point-min))
 		       (re-search-forward
 			(concat "\n" (regexp-quote mail-header-separator)
@@ -2649,7 +2649,7 @@ Content-Disposition: attachment; filename=smime.p7m][base64]]
   (if (re-search-forward mime-edit-single-part-tag-regexp nil t)
       (let* ((beg (match-beginning 0))
 	     (end (match-end 0))
-	     (tag (buffer-substring beg end)))
+	     (tag (match-string 0)))
 	(delete-region beg end)
 	(let ((contype (mime-edit-get-contype tag))
 	      (encoding (mime-edit-get-encoding tag)))
@@ -2692,7 +2692,7 @@ Content-Disposition: attachment; filename=smime.p7m][base64]]
 	  (while (re-search-forward
 		  mime-edit-single-part-tag-regexp nil t)
 	    (setq tag
-		  (buffer-substring (match-beginning 0) (match-end 0)))
+		  (match-string 0))
 	    (delete-region (match-beginning 0) (1+ (match-end 0)))
 	    (setq contype (mime-edit-get-contype tag))
 	    (setq encoding (mime-edit-get-encoding tag))
@@ -2730,7 +2730,7 @@ Content-Disposition: attachment; filename=smime.p7m][base64]]
   ;; Check each tag, and add new tag or correct it if necessary.
   (goto-char (point-min))
   (while (re-search-forward mime-edit-single-part-tag-regexp nil t)
-    (let* ((tag (buffer-substring (match-beginning 0) (match-end 0)))
+    (let* ((tag (match-string 0))
 	   (contype (mime-edit-get-contype tag))
 	   (charset (mime-get-parameter contype "charset"))
 	   (encoding (mime-edit-get-encoding tag)))
@@ -3170,10 +3170,9 @@ Content-Type: message/partial; id=%s; number=%d; total=%d\n%s\n"
 	       ))
 	  (mime-edit-partial-number 1)
 	  data)
-      (save-excursion
-	(set-buffer copy-buf)
+      (with-current-buffer copy-buf
 	(erase-buffer)
-	(insert-buffer the-buf)
+	(insert-buffer-substring the-buf)
 	(save-restriction
 	  (if (re-search-forward
 	       (concat "^" (regexp-quote separator) "$") nil t)
@@ -3188,8 +3187,7 @@ Content-Type: message/partial; id=%s; number=%d; total=%d\n%s\n"
 	    )))
       (while (< mime-edit-partial-number total)
 	(erase-buffer)
-	(save-excursion
-	  (set-buffer copy-buf)
+	(with-buffer copy-buf
 	  (setq data (buffer-substring
 		      (point-min)
 		      (progn
@@ -3212,11 +3210,9 @@ Content-Type: message/partial; id=%s; number=%d; total=%d\n%s\n"
 	      (1+ mime-edit-partial-number))
 	)
       (erase-buffer)
-      (save-excursion
-	(set-buffer copy-buf)
+      (with-buffer copy-buf
 	(setq data (buffer-string))
-	(erase-buffer)
-	)
+	(erase-buffer))
       (mime-edit-insert-partial-header
        header subject id mime-edit-partial-number total separator)
       (insert data)
