@@ -1,5 +1,10 @@
 2014-05-31  Juliusz Chroboczek  <jch@pps.univ-paris-diderot.fr>
 
+	* mime-edit.el (mime-edit-preview-message): Don't go through
+	temporary string, insert directly from original buffer.
+
+2014-05-31  Juliusz Chroboczek  <jch@pps.univ-paris-diderot.fr>
+
 	* mime-edit.el (mime-edit-normalize-body): Don't try to optimise
 	by calling detect-coding-string, this doesn't work on Emacs 23.
 

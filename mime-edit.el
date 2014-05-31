@@ -3251,8 +3251,7 @@ Content-Type: message/partial; id=%s; number=%d; total=%d\n%s\n"
 (defun mime-edit-preview-message ()
   "preview editing MIME message."
   (interactive)
-  (let* ((str (buffer-string))
-	 (separator mail-header-separator)
+  (let* ((separator mail-header-separator)
 	 (the-buf (current-buffer))
 	 (buf-name (buffer-name))
 	 (temp-buf-name (concat "*temp-article:" buf-name "*"))
@@ -3267,7 +3266,7 @@ Content-Type: message/partial; id=%s; number=%d; total=%d\n%s\n"
       (setq buf (get-buffer-create temp-buf-name))
       (switch-to-buffer buf)
       )
-    (insert str)
+    (insert-buffer-substring the-buf)
     (setq major-mode 'mime-temp-message-mode)
     (make-local-variable 'mail-header-separator)
     (setq mail-header-separator separator)
