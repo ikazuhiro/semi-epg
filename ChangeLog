@@ -1,3 +1,8 @@
+2014-05-31  Juliusz Chroboczek  <jch@pps.univ-paris-diderot.fr>
+
+	* mime-edit.el (mime-edit-normalize-body): Don't try to optimise
+	by calling detect-coding-string, this doesn't work on Emacs 23.
+
 2014-05-30  Juliusz Chroboczek  <jch@pps.univ-paris-diderot.fr>
 
 	* mime-view.el (mime-display-multipart/alternative): Pick and

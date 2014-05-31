@@ -2764,18 +2764,13 @@ Content-Disposition: attachment; filename=smime.p7m][base64]]
 		(intern (downcase charset)))
 	       ;; Encoded (inserted text file).
 	       (encoding
-		(let* ((string
-			(mime-decode-string
-			 (buffer-substring (point) (mime-edit-content-end))
-			 encoding))
-		       (coding (detect-coding-string string t)))
-		  (or (coding-system-to-mime-charset coding)
-		      (if (fboundp 'detect-mime-charset-string)
-			  (detect-mime-charset-string string)
-			(with-temp-buffer
-			  (insert string)
-			  (detect-mime-charset-region
-			   (point-min) (point-max)))))))
+		(let ((buffer (current-buffer))
+		      (beg (point))
+		      (end (mime-edit-content-end)))
+		  (with-temp-buffer
+		    (insert-buffer-substring buffer beg end)
+		    (mime-decode-region (point-min) (point-max) encoding)
+		    (detect-mime-charset-region (point-min) (point-max)))))
 	       ;; Inputted directly or reeditting.
 	       (t
 		(mime-edit-choose-charset))))
